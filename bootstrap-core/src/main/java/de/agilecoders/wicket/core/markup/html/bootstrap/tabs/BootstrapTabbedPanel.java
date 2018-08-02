@@ -35,7 +35,7 @@ public class BootstrapTabbedPanel<T extends ITab> extends TabbedPanel<T> {
 
     @Override
     protected String getSelectedTabCssClass() {
-        return "active";
+        return "";
     }
 
     @Override
@@ -47,5 +47,26 @@ public class BootstrapTabbedPanel<T extends ITab> extends TabbedPanel<T> {
 	protected String getTabContainerCssClass()
 	{
 		return "nav nav-tabs";
+	}
+    
+    protected WebMarkupContainer newLink(final String linkId, final int index)
+	{
+		return new Link<Void>(linkId)
+		{
+			private static final long serialVersionUID = 1L;
+
+            @Override
+            public void onComponentTag(final ComponentTag tag) {
+                if (getSelectedTab() == index)  {
+                    Attributes.addClass(tag, "active");
+                }
+            }
+            
+			@Override
+			public void onClick()
+			{
+				setSelectedTab(index);
+			}
+		};
 	}
 }
