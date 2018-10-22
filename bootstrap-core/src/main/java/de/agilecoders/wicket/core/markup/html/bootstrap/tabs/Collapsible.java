@@ -95,7 +95,7 @@ public class Collapsible extends Panel {
 
         checkComponentTag(tag, "div");
 
-        Attributes.addClass(tag, "panel-group");
+        Attributes.addClass(tag, "accordion");
     }
 
     /**
@@ -110,27 +110,34 @@ public class Collapsible extends Panel {
 
             @Override
             protected void populateItem(final LoopItem loopItem) {
-                final CharSequence parentMarkupId = Strings2.getMarkupId(Collapsible.this);
-                final ITab tab = Collapsible.this.tabs.get(loopItem.getIndex());
+                final CharSequence parentMarkupId = Strings2.getMarkupId(B4Collapsible.this);
+                
+                final ITab tab = B4Collapsible.this.tabs.get(loopItem.getIndex());
                 final State state = activeTab.getObject().equals(loopItem.getIndex()) ? State.Active : State.Inactive;
 
                 final Component container = newContainer("body", tab, state);
+                final String containerMarkupId = container.getMarkupId(true);
                 final Component title = newTitle("title", tab, state);
 
                 title.add(new AttributeModifier("data-parent", "#" + parentMarkupId));
-                title.add(new AttributeModifier("href", "#" + container.getMarkupId(true)));
+                title.add(new AttributeModifier("data-target", "#" + containerMarkupId));
+                title.add(new AttributeModifier("aria-controls", containerMarkupId));
 
+                container.add(new AttributeModifier("data-parent", "#" + parentMarkupId));
+                container.add(new AttributeModifier("aria-labelledby", "#" + title.getMarkupId(true)));
+                
                 loopItem.add(title);
                 loopItem.add(container);
             }
         };
     }
 
+    
     /**
      * @return the active state css class name as {@link CssClassNameAppender}.
      */
     protected CssClassNameAppender getActiveCssClassNameAppender() {
-        return new CssClassNameAppender("in");
+        return new CssClassNameAppender("show");
     }
 
     /**
@@ -145,13 +152,19 @@ public class Collapsible extends Panel {
         final WebMarkupContainer container = new WebMarkupContainer(markupId);
         container.setOutputMarkupId(true);
         container.add(tab.getPanel("content"));
+        
 
         if (State.Active.equals(state)) {
-            container.add(getActiveCssClassNameAppender());
+        	container.add(new AttributeModifier("aria-expand", "true"));
+        	container.add(getActiveCssClassNameAppender());
+        }
+        else {
+        	container.add(new AttributeModifier("aria-expand", "false"));
         }
 
         return container;
     }
+
 
     /**
      * creates a new title component.
